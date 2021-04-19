@@ -3,9 +3,12 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "CloudMusic": {
+    "ng-cloudMusic": {
       "projectType": "application",
       "schematics": {
+        "@schematics/angular:component": {
+          "style": "less"
+        },
         "@schematics/angular:application": {
           "strict": true
         }
@@ -17,7 +20,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/CloudMusic",
+            "outputPath": "dist/ng-cloudMusic",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -25,10 +28,16 @@
             "aot": true,
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/"
+              }
             ],
             "styles": [
-              "src/styles.css"
+              "src/assets/styles/index.less",
+              "node_modules/ng-zorro-antd/ng-zorro-antd.min.css"
             ],
             "scripts": []
           },
@@ -65,18 +74,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "CloudMusic:build"
+            "browserTarget": "ng-cloudMusic:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "CloudMusic:build:production"
+              "browserTarget": "ng-cloudMusic:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "CloudMusic:build"
+            "browserTarget": "ng-cloudMusic:build"
           }
         },
         "test": {
@@ -91,7 +100,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/assets/styles/index.less"
             ],
             "scripts": []
           }
@@ -113,16 +122,16 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "CloudMusic:serve"
+            "devServerTarget": "ng-cloudMusic:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "CloudMusic:serve:production"
+              "devServerTarget": "ng-cloudMusic:serve:production"
             }
           }
         }
       }
     }
   },
-  "defaultProject": "CloudMusic"
+  "defaultProject": "ng-cloudMusic"
 }
