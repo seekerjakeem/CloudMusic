@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { NzButtonModule } from 'ng-zorro-antd/button';
 
 @Component({
   selector: 'app-root',
@@ -7,5 +6,5 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
   styleUrls: ['./app.component.less']
 })
 export class AppComponent {
-  title = 'ng-cloudMusic';
+  title = 'ng-wyy';
 }
