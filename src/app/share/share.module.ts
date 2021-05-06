@@ -6,6 +6,7 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { NzCarouselModule } from 'ng-zorro-antd/carousel';
 
 
 
@@ -19,7 +20,8 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
     NzLayoutModule,
     NzInputModule,
     NzIconModule,
-    NzMenuModule
+    NzMenuModule,
+    NzCarouselModule,
   ],
   exports: [
     CommonModule,
@@ -28,7 +30,8 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
     NzLayoutModule,
     NzInputModule,
     NzIconModule,
-    NzMenuModule
+    NzMenuModule,
+    NzCarouselModule
   ]
 })
 export class ShareModule { }
