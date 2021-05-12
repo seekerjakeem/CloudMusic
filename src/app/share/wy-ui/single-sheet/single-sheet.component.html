@@ -1,15 +1,15 @@
 <ng-container>
     <a class="cover">
-        <img src="https://p2.music.126.net/1-RCuhfKIQdZPBf4V8lhlg==/109951165806507639.jpg" alt="">
+        <img [src]="curSongSheet.picUrl" alt="curSongSheet.name">
         <div class="bottom">
             <div class="num">
                 <i class="icon erji"></i>
-                <span>13648</span>
+                <span>{{curSongSheet.playCount| playCountPipe}}</span>
             </div>
             <div>
                 <i class="icon play"></i>
             </div>
         </div>
     </a>
-    <span class="dec">歌单123</span>
+    <span class="dec">{{curSongSheet.name}}</span>
 </ng-container>  

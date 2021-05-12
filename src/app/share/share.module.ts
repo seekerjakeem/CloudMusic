@@ -14,7 +14,8 @@ import { WyUiModule } from './wy-ui/wy-ui.module';
 
 
 @NgModule({
-  declarations: [],
+  declarations: [
+  ],
   imports: [
     CommonModule,
     FormsModule,
@@ -35,7 +36,7 @@ import { WyUiModule } from './wy-ui/wy-ui.module';
     NzIconModule,
     NzMenuModule,
     NzCarouselModule,
-    WyUiModule
+    WyUiModule,
   ]
 })
 export class ShareModule { }
