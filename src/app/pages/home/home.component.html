@@ -27,9 +27,7 @@
                 <a href="" *ngFor="let item of hotTags">{{item.name}}</a>
               </nav>
             </div>
-            <a>
-              更多
-              <i nz-icon nzType="arrow-right" nzTheme="outline"></i>
+            <a>更多<i nz-icon nzType="arrow-right" nzTheme="outline"></i>
             </a>
 
           </div>
@@ -38,20 +36,32 @@
               <app-single-sheet 
               class="sheet-item" 
               *ngFor="let item of songSheet"
-              [curSongSheet]= "item"
-              ></app-single-sheet>
-              
+              [curSongSheet]= "item">
+            </app-single-sheet>
             </div>
           </div>
 
         </div>
       </div>
 
+      <div class="right">
+        <app-member-card></app-member-card>
 
-
-
-
-      <div class="right">right</div>
+        <div class="settled-singer">
+          <div class="tit"><b>入驻歌手</b></div>
+          <div class="list">
+            <div class="card" *ngFor="let singer of signers">
+              <div class="pic">
+                <img [src]= "singer.picUrl" alt="singer.name">
+              </div>
+              <div class="txt">
+                <b class="ellipsis">{{singer.name}}</b>
+                <span>专辑数: {{singer.albumSize}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

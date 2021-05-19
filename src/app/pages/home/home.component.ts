@@ -1,8 +1,12 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NzCarouselComponent } from 'ng-zorro-antd/carousel';
-import { Banner, HotTag, SongSheet } from 'src/app/services/data-types/common-types';
+import { Banner, HotTag, Singer, SongSheet } from 'src/app/services/data-types/common-types';
 import { HomeService } from 'src/app/services/home.service';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { SingerService } from 'src/app/services/singer.service';
+import { HomeResolverService } from './home-resolve.service';
+import { ActivatedRoute } from '@angular/router';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-home',
@@ -15,11 +19,19 @@ export class HomeComponent implements OnInit {
   banners: Banner[];
   hotTags: HotTag[];
   songSheet: SongSheet[];
+  signers: Singer[];
 
-  constructor(private homeServe: HomeService) {
-    this.getBanners(); 
-    this.getHotTags();  
-    this.getSongSheet();                         
+  constructor(private homeServe: HomeService, private singerServie: SingerService, private route: ActivatedRoute) {
+    // this.getBanners(); 
+    // this.getHotTags();  
+    // this.getSongSheet();  
+    // this.getEnterSinger();     
+    this.route.data.pipe(map(res => res.homeDatas)).subscribe(([banners,hotTags,songSheet,Singer]) => {
+      this.banners = banners;
+      this.hotTags = hotTags;
+      this.songSheet = songSheet;
+      this.signers = Singer;
+    })
   }
 
   ngOnInit() {
@@ -29,24 +41,33 @@ export class HomeComponent implements OnInit {
     this.carouselActiveIndex = to;
   }
 
-  /*获取轮播图 */
-  private getBanners() {
-    this.homeServe.getBanners().subscribe(banners => {
-      this.banners = banners;
-    }); 
-  }
+  // /*获取轮播图 */
+  // private getBanners() {
+  //   this.homeServe.getBanners().subscribe(banners => {
+  //     this.banners = banners;
+  //   }); 
+  // }
 
-  private getHotTags() {
-    this.homeServe.getHotTags().subscribe(tags => {
-      this.hotTags = tags;
-    });
-  }
+  // private getHotTags() {
+  //   this.homeServe.getHotTags().subscribe(tags => {
+  //     this.hotTags = tags;
+  //   });
+  // }
 
-  private getSongSheet(){
-    this.homeServe.getPersonalSheetList().subscribe(sheetList => {
-      this.songSheet = sheetList;
-    });
-  }
+  // // 获取歌单
+  // private getSongSheet(){
+  //   this.homeServe.getPersonalSheetList().subscribe(sheetList => {
+  //     this.songSheet = sheetList;
+  //   });
+  // }
+  
+  // //获取入驻歌手
+  // private getEnterSinger() {
+  //   this.singerServie.getEnterSinger().subscribe(enterSinger => {
+  //     this.signers = enterSinger; 
+  //     console.log('入驻歌手',this.signers);
+  //   });
+  // }
   /**
    * 箭头触发切换事件
    */
