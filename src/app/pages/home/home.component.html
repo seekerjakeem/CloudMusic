@@ -36,7 +36,8 @@
               <app-single-sheet 
               class="sheet-item" 
               *ngFor="let item of songSheet"
-              [curSongSheet]= "item">
+              [curSongSheet]= "item"
+              (onplay) = onPlaySheet($event)>
             </app-single-sheet>
             </div>
           </div>

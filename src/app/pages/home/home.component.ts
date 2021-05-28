@@ -7,6 +7,7 @@ import { SingerService } from 'src/app/services/singer.service';
 import { HomeResolverService } from './home-resolve.service';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs/operators';
+import { SheetService } from 'src/app/services/sheet.service';
 
 @Component({
   selector: 'app-home',
@@ -21,7 +22,12 @@ export class HomeComponent implements OnInit {
   songSheet: SongSheet[];
   signers: Singer[];
 
-  constructor(private homeServe: HomeService, private singerServie: SingerService, private route: ActivatedRoute) {
+  constructor(
+    private homeServe: HomeService, 
+    private singerServie: SingerService, 
+    private route: ActivatedRoute,
+    private sheetService: SheetService
+    ) {
     // this.getBanners(); 
     // this.getHotTags();  
     // this.getSongSheet();  
@@ -40,6 +46,13 @@ export class HomeComponent implements OnInit {
   onBeforeChange({to}) {
     this.carouselActiveIndex = to;
   }
+
+  onPlaySheet(id: number) {
+    this.sheetService.playSheet(id).subscribe(sheet => {
+      console.log('sheet',sheet)
+    });
+  }
+
 
   // /*获取轮播图 */
   // private getBanners() {

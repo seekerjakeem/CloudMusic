@@ -14,7 +14,7 @@ export class WyCarouselComponent implements OnInit {
   // 更加严谨，只能是pre或者next
   @Output() changeSlide = new EventEmitter<'pre'|'next'>();
   @ViewChild('dot', {static: true})  dotRef: TemplateRef<any>;
-  constructor() { }
+  constructor() { }  
 
   ngOnInit(): void {
   }
