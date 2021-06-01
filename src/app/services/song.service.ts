@@ -18,15 +18,20 @@ export class SongService {
     .pipe(map((res : {data: SongUrl[]}) => res.data));
   };
 
+  // getSongList(song: Song | Song[]):Observable<Song[]>{
+  //     const songArr = Array.isArray(song)? song.slice(): [song];
+  //     const ids = songArr.map(item => item.id).join(',');
+  //     return Observable.create(observer => {
+  //       this.getSongUrl(ids).subscribe(urls => {
+  //         observer.next(this.generateSongList(songArr, urls));
+  //       })
+  //     });
+  // };
   getSongList(song: Song | Song[]):Observable<Song[]>{
-      const songArr = Array.isArray(song)? song.slice(): [song];
-      const ids = songArr.map(item => item.id).join(',');
-      return Observable.create(observer => {
-        this.getSongUrl(ids).subscribe(urls => {
-          observer.next(this.generateSongList(songArr, urls));
-        })
-      });
-  };
+    const songArr = Array.isArray(song)? song.slice(): [song];
+    const ids = songArr.map(item => item.id).join(',');
+    return this.getSongUrl(ids).pipe(map(urls => this.generateSongList(songArr, urls)));
+  }
 
     generateSongList(songs: Song[], urls: SongUrl[]): Song[] {
       const result = [];

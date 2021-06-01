@@ -10,7 +10,7 @@ import { SheetService } from 'src/app/services/sheet.service';
 @NgModule({
   declarations: [
     SingleSheetComponent,
-    PlayCountPipe
+    PlayCountPipe,
   ],
   imports: [
     WyPlayerModule
