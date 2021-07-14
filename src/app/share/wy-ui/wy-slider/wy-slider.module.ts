@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { WySliderComponent } from './wy-slider.component';
 import { WySliderTrackComponent } from './wy-slider-track.component';
 import { WySliderHandleComponent } from './wy-slider-handle.component';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -14,7 +15,8 @@ import { WySliderHandleComponent } from './wy-slider-handle.component';
     
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    FormsModule
   ],
   exports: [
     WySliderComponent,

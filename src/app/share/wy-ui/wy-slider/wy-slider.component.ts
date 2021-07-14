@@ -1,11 +1,12 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, Inject, Input, OnChanges, OnInit, SimpleChanges, ViewChild, ViewEncapsulation } from '@angular/core';
-import { fromEvent, merge, Observable } from 'rxjs';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, forwardRef, Inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ViewEncapsulation } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { fromEvent, merge, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, pluck, takeUntil, tap } from 'rxjs/operators';
 import { inArray } from 'src/app/utils/array';
-import { limitNumberInRange } from 'src/app/utils/number';
+import { getPercent, limitNumberInRange } from 'src/app/utils/number';
 import { getElementOffset, sliderEvent } from './wy-slider-helper';
-import { SliderEventObserverConfig } from './wy-slider-type';
+import { SilderValue, SliderEventObserverConfig } from './wy-slider-type';
 
 @Component({
   selector: 'app-wy-slider',
@@ -13,8 +14,14 @@ import { SliderEventObserverConfig } from './wy-slider-type';
   styleUrls: ['./wy-slider.component.less'],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush, 
+  providers: [{
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: forwardRef(() => WySliderComponent),//允许我们使用尚未定义的类
+    multi: true 
+  }]
+  // onPush这个策略如果在input不发生变化的时候，永远不发生变更检测
 })
-export class WySliderComponent implements OnInit, OnChanges {
+export class WySliderComponent implements OnInit, OnChanges,OnDestroy, ControlValueAccessor {
   show = true;
   private sliderDom: HTMLDivElement;
   @Input() wyVertical = false ;
@@ -26,8 +33,22 @@ export class WySliderComponent implements OnInit, OnChanges {
   private dragMove$: Observable<number>;
   private dragEnd$: Observable<Event>;
 
-  constructor(@Inject(DOCUMENT) private doc: Document) { }
+  private dragStart_: Subscription| null;
+  private dragMove_: Subscription| null;
+  private dragEnd_: Subscription| null;
 
+  isDragging = false; //正在移动进度条滑块
+  value: SilderValue = null; //滑块的位置和进度条的位置
+  offset: SilderValue = null;
+  constructor(
+    @Inject(DOCUMENT) private doc: Document,
+    private cdr: ChangeDetectorRef //手动的进行变更检测
+    ) { }
+
+  ngOnDestroy(): void {
+    this.unSubscribeDrag();
+  }
+ 
 
   ngOnChanges(changes: SimpleChanges): void {
   //  this.show = false;
@@ -97,25 +118,103 @@ export class WySliderComponent implements OnInit, OnChanges {
 
   //传入参数的默认值
   private subscribeDrag(events: string[] = ['start','move','end']) {
-    if(inArray(events,'start') && this.dragStart$) {
-      this.dragStart$.subscribe(this.onDragStart.bind(this));
+    if(inArray(events,'start') && this.dragStart$ && !this.dragStart_) {
+      this.dragStart_ = this.dragStart$.subscribe(this.onDragStart.bind(this));
     }
-    if(inArray(events,'move') && this.dragStart$) {
-      this.dragMove$.subscribe(this.onDragMove.bind(this));
+    if(inArray(events,'move') && this.dragMove$ && !this.dragMove_) {
+      this.dragMove_ = this.dragMove$.subscribe(this.onDragMove.bind(this));
     }
-    if(inArray(events,'end') && this.dragStart$) {
+    if(inArray(events,'end') && this.dragEnd$ && !this.dragEnd_) {
+      this.dragEnd_ = this.dragEnd$.subscribe(this.onDragEnd.bind(this));
+    }
+  }
+
+  
+  //进行解绑
+  private unSubscribeDrag(events: string[] = ['start','move','end']) {
+    if(inArray(events,'start') && this.dragStart$ && this.dragStart_) {
+      this.dragStart_.unsubscribe();
+      this.dragStart_ = null;
+    }
+    if(inArray(events,'move') && this.dragMove$ && this.dragMove_) {
+      this.dragMove_.unsubscribe();
+      this.dragMove_ = null;
+    }
+    if(inArray(events,'end') && this.dragEnd$ && !this.dragEnd_) {
       this.dragEnd$.subscribe(this.onDragEnd.bind(this));
     }
   }
 
   private onDragStart(value: number) {
-    console.log(value);
+    console.log('onDragStart: ',value);
+    this.toggleDragMoving(true);
   }
 
-  private onDragMove(value: number) {}
+  private onDragMove(value: number) {
+    if(this.isDragging) {
+      // console.log('onDragMove', value);
+      this.setValue(value, false);
+      this.cdr.markForCheck();//这样手动的进行一次变更检测
+    }
+  }
 
   private onDragEnd() {
+    this.toggleDragMoving(false);
+    this.cdr.markForCheck();//这样手动的进行一次变更检测
+  }
 
+  private setValue(val:  SilderValue, needCheck: boolean) {
+    console.log("初始值",val);
+    if (needCheck){
+      if(this.isDragging) return;
+      this.value = this.formatValue(val);
+      this.undateTrackAndHandles();
+    } else if (!this.valueEqual(this.value, val)) {
+      this.value = val;
+      this.undateTrackAndHandles();
+    }
+  }
+
+  private formatValue(value:  SilderValue): SilderValue{
+    let res = value;
+    if (this.assertValueValid(value)){
+      res = this.wyMin;
+    } else if(!this.valueEqual(this.value,value)){
+      this.value = value;
+      this.undateTrackAndHandles();
+      this.onValueChange(this.value);
+    }
+    return res;
+  }
+
+  private assertValueValid(value:  SilderValue): boolean {
+    return isNaN(typeof value !== 'number' ? parseFloat(value) :value)
+  }
+
+  private valueEqual(valA: SilderValue, valB: SilderValue) {
+    if (typeof valA !== typeof valB) {
+      return false;
+    }
+    return valA === valB;
+  }
+
+  private undateTrackAndHandles() {
+    this.offset = this.getValueToOffest(this.value);
+    // console.log('offset:', this.offest);
+    this.cdr.markForCheck();
+  }
+
+  private getValueToOffest(value: SilderValue): SilderValue {
+    return getPercent(value, this.wyMin, this.wyMax);
+  }
+  private toggleDragMoving(movable: boolean) {
+    this.isDragging = movable;
+    if (this.isDragging) {
+      // 正在移动的时候绑定move和end事件
+      this.subscribeDrag(['move','end']);
+    } else {
+      this.unSubscribeDrag(['move','end']);
+    }
   }
 
   private findClosestValue(position: number): number {
@@ -136,8 +235,26 @@ export class WySliderComponent implements OnInit, OnChanges {
   }
 
   private getSliderStartPosition(): number {
-    const offset = getElementOffset(this.sliderDom);
-    return this.wyVertical? offset.top: offset.left;
+    const offsetPosition = getElementOffset(this.sliderDom);
+    return this.wyVertical? offsetPosition.top: offsetPosition.left;
+  }
+
+  writeValue(value: SilderValue): void {
+    this.setValue(value, true);
+  }
+  registerOnChange(fn: (value: SilderValue) => void): void {
+    this.onValueChange = fn;
+    
+  }
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  private onValueChange(value: SilderValue): void{
+
+  }
+  private onTouched():void {
+
   }
 
 
